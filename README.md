@@ -1,4 +1,4 @@
-# Route & Fleet Lab
+# Smart Route: Dynamic Travelling Salesman Route Planner
 
 Route planning and fleet assignment, implemented twice: as a browser app and as a Java DSA project.
 
