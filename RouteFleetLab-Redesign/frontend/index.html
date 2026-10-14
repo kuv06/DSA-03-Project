@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Route &amp; Fleet Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="layout.css">
+</head>
+<body>
+<!-- ================= LOGIN ================= -->
+<div class="login-screen" id="loginScreen">
+  <section class="login-hero">
+    <p class="login-kicker">Route &amp; Fleet Lab</p>
+    <h1>Plan routes. Assign your fleet.</h1>
+    <p class="login-lead">Find the shortest way to visit a set of Indian cities, then split the stops across your vehicles and see the distance and time for each. Sign in to open the console.</p>
+    <svg class="login-art" viewBox="0 0 800 260" aria-hidden="true">
+      <path class="draw teal" d="M20 40 H170 V120 H320 V210 H500 V90 H720"/>
+      <path class="draw orange" d="M20 230 L150 60 L290 170 L440 30 L580 150 L700 50 L780 130"/>
+      <g fill="#EDE6D6"><circle cx="20" cy="230" r="6"/><circle cx="290" cy="170" r="6"/><circle cx="580" cy="150" r="6"/><circle cx="780" cy="130" r="6"/></g>
+    </svg>
+    <dl class="login-stats"><div><dt>100</dt><dd>cities loaded</dd></div><div><dt>4</dt><dd>algorithms</dd></div><div><dt>Live</dt><dd>cost &amp; time estimates</dd></div></dl>
+  </section>
+  <div class="login-card">
+    <h2>Welcome back</h2>
+    <p>Sign in to open the console.</p>
+    <form id="loginForm">
+      <label for="loginUsername">Username</label>
+      <input type="text" id="loginUsername" placeholder="Enter username" autocomplete="username" required>
+      <label for="loginPassword">Password</label>
+      <input type="password" id="loginPassword" placeholder="Enter password" autocomplete="current-password" required>
+      <button type="submit" class="login-btn">Sign in</button>
+      <div class="login-error" id="loginError"></div>
+    </form>
+    <div class="login-demo">Demo login: <b>admin</b> / <b>admin123</b></div>
+  </div>
+</div>
+
+<!-- ================= APP SHELL ================= -->
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand"><b>Route &amp; Fleet Lab</b><span>Route planning &amp; fleet assignment</span></div>
+    <p class="side-meta"><span id="tb-nodes">100 cities loaded</span> · <span id="tb-selected">0</span> selected</p>
+    <nav class="nav" aria-label="Sections">
+      <button class="nav-item active" data-go="dashboard" type="button"><i>▦</i>Dashboard</button>
+      <button class="nav-item" data-go="planner" type="button"><i>⌖</i>Route planner</button>
+      <button class="nav-item" data-go="fleet" type="button"><i>⇉</i>Fleet assignment</button>
+      <button class="nav-item" data-go="log" type="button"><i>≡</i>Session log<em id="logBadge">0</em></button>
+    </nav>
+    <div class="side-foot">
+      <p>Signed in as <b id="loggedInUser">—</b></p>
+      <button class="ghost" id="resetSel" type="button">Reset selection</button>
+      <button class="ghost logout-btn" id="logoutBtn" type="button">Sign out</button>
+    </div>
+  </aside>
+
+  <main class="main">
+  <!-- ===== Dashboard ===== -->
+  <div class="view" data-view="dashboard">
+    <section class="hero-row">
+      <div class="hero-card">
+        <h1>Plan the shortest route. Assign it across your fleet.</h1>
+        <p>Pick a handful of Indian cities, find the shortest tour through all of them, or split the stops across vehicles and compare distance and drive time. Everything runs live in your browser.</p>
+        <div class="hero-actions"><button class="run-btn" data-go="planner" type="button">Open route planner</button><button class="run-btn alt" data-go="fleet" type="button">Open fleet assignment</button></div>
+      </div>
+      <div class="quick-card">
+        <h2>Quick start</h2>
+        <p class="hint">No cities yet? Load six Telangana and Andhra Pradesh cities and the charts below fill in.</p>
+        <button class="run-btn ghosty" id="dashExample" type="button">Load example cities</button>
+        <button class="link-btn" data-go="planner" type="button">Choose your own cities</button>
+      </div>
+    </section>
+
+    <section class="kpis" aria-label="Key figures">
+      <div class="kpi"><span class="kpi-n" id="kSel">0</span><span class="kpi-l">Cities selected</span><span class="kpi-s" id="kSelS">of 13 allowed</span></div>
+      <div class="kpi"><span class="kpi-n" id="kDist">—</span><span class="kpi-l">Last route distance</span><span class="kpi-s" id="kDistS">Run the route planner</span></div>
+      <div class="kpi"><span class="kpi-n" id="kTime">—</span><span class="kpi-l">Drive time</span><span class="kpi-s" id="kTimeS">at 60 km/h average</span></div>
+      <div class="kpi"><span class="kpi-n" id="kRuns">0</span><span class="kpi-l">Runs this session</span><span class="kpi-s" id="kRunsS">No runs yet</span></div>
+    </section>
+
+    <section class="dash-grid">
+      <article class="card map-card"><h2>Route map</h2><p class="hint" id="mapHint">Selected cities are highlighted. A route appears after you run the planner.</p><svg id="routeMap" viewBox="0 0 520 560" role="img" aria-label="Map of selected cities and last route"></svg></article>
+      <div class="dash-col">
+        <article class="card"><h2>Distance from first city</h2><p class="hint" id="hubHint">Straight road distance to every other selected city.</p><div class="bars" id="hubBars"></div></article>
+        <article class="card"><h2>Legs of the last route</h2><p class="hint">Each hop in the most recent route.</p><div class="bars" id="legBars"></div></article>
+      </div>
+      <article class="card"><h2>Coverage by state</h2><p class="hint">Cities available per state (light) and how many you selected (orange).</p><div class="bars" id="stateBars"></div></article>
+      <article class="card"><h2>Recent runs</h2><div id="recentRuns"></div></article>
+    </section>
+
+    <section class="card"><div class="algo-head"><h2>City directory</h2><span class="algo-tag" id="dirCount">100 cities</span></div><p class="hint">Click a city to add or remove it from your selection.</p><div class="dir" id="dirChips"></div></section>
+  </div>
+
+  <!-- ===== Route planner ===== -->
+  <div class="view" data-view="planner" hidden>
+    <header class="page-head"><h1>Route planner</h1><p>Choose cities, pull them out of text, then find the exact shortest route.</p></header>
+<section class="panel">
+     <h2>Choose your cities</h2>
+    <p class="hint">Pick the cities every algorithm below will work with. Bitmask DP is exact but
+      exponential, so keep the selection to <b id="max-nodes-label">13</b> cities or fewer for
+      the browser to stay snappy.</p>
+
+    <div class="city-picker">
+      <div class="city-search">
+        <input type="text" id="citySearch" placeholder="Search a city or state…" autocomplete="off">
+        <div class="city-list" id="cityList"></div>
+      </div>
+      <div class="selected-box">
+        <div class="chips" id="chips">
+          <span class="empty-note">No cities selected yet — search and check a few on the left.</span>
+        </div>
+        <div class="picker-actions">
+          <button class="link-btn" id="loadExample">Load an example (6 Telangana/AP cities)</button>
+          <button class="link-btn" id="clearAll">Clear selection</button>
+        </div>
+      </div>
+    </div>
+  </section>
+<section class="panel" id="acPanel">
+     <h2>Extract cities from text (Aho-Corasick)</h2>
+    <p class="hint">Paste any paragraph and this searches for all 100 city names <b>at once</b>,
+      in a single linear pass over the text — a trie of every city name with failure links
+      (Aho-Corasick), rather than 100 separate substring searches. Matches are checked against
+      their surrounding characters so "Pune" inside "Puneet" doesn't count.</p>
+
+    <textarea id="acText" rows="3" placeholder="e.g. Starting from Hyderabad, we'll swing through Warangal and Vijayawada before finishing in Guntur and Tirupati."
+      style="width:100%; font-family:inherit; font-size:13px; padding:10px; border:1px solid var(--line); border-radius:3px; resize:vertical; color:var(--ink);"></textarea>
+
+    <div class="picker-actions" style="margin-top:10px;">
+      <button class="run-btn" id="acRun" style="background:var(--ink);">Extract cities</button>
+    </div>
+    <div class="output" id="acOutput"></div>
+  </section>
+<section class="algo-panel" id="bitmaskPanel">
+    <div class="algo-head">
+       <h2>Bitmask Dynamic Programming</h2>
+      <span class="algo-tag">dp[mask][j], O(n²·2ⁿ)</span>
+    </div>
+    <p class="hint">The core technique, on its own: dp[mask][j] = the cheapest way to start at a
+      fixed city, visit exactly the cities in <code>mask</code>, and end at city j. Below is that
+      table's own progress — the best cost found so far as more cities get folded into the mask,
+      level by level — before it's ever used to build a route.</p>
+
+    <div class="variant-tabs" id="bitmaskTabs" role="tablist">
+      <button class="active" data-mode="all">All selected nodes</button>
+      <button data-mode="each">For each node</button>
+      <button data-mode="between">Between two chosen nodes</button>
+    </div>
+
+    <div class="controls-row" id="bitmaskControls"></div>
+
+    <button class="run-btn" id="bitmaskRun">Run bitmask DP</button>
+    <div class="output" id="bitmaskOutput"></div>
+  </section>
+<section class="algo-panel" id="dpPanel">
+    <div class="algo-head">
+       <h2>Travelling Salesperson (TSP)</h2>
+      <span class="algo-tag">Solved via bitmask DP</span>
+    </div>
+    <p class="hint">The applied result: reading the same dp[mask][j] table above to build an
+      actual route. Three ways to read it:</p>
+
+    <div class="variant-tabs" id="dpTabs" role="tablist">
+      <button class="active" data-mode="all">All selected nodes (closed tour)</button>
+      <button data-mode="each">For each node (best path from it)</button>
+      <button data-mode="between">Between two chosen nodes</button>
+    </div>
+
+    <div class="controls-row" id="dpControls">
+      <!-- populated by JS depending on mode -->
+    </div>
+
+    <button class="run-btn" id="dpRun">Run TSP</button>
+    <div class="output" id="dpOutput"></div>
+  </section>
+  </div>
+
+  <!-- ===== Fleet assignment ===== -->
+  <div class="view" data-view="fleet" hidden>
+    <header class="page-head"><h1>Fleet assignment</h1><p>Split the selected cities across vehicles at the lowest total distance.</p></header>
+    <div class="sel-note"><span><b id="fleetSelCount">0</b> cities selected</span><button class="link-btn" data-go="planner" type="button">Change cities</button></div>
+<section class="algo-panel flow" id="flowPanel">
+    <div class="algo-head">
+       <h2>Minimum-Cost Maximum-Flow</h2>
+      <span class="algo-tag">Successive Shortest Paths</span>
+    </div>
+    <p class="hint">Repeatedly augments along the cheapest source→sink path in the residual
+      graph (SPFA) until none remain. Three networks to run it on:</p>
+
+    <div class="variant-tabs" id="flowTabs" role="tablist">
+      <button class="active" data-mode="between">Between two chosen nodes</button>
+      <button data-mode="all">All nodes (vehicle assignment)</button>
+      <button data-mode="each">For each node (from a depot)</button>
+    </div>
+
+    <div class="controls-row" id="flowControls"></div>
+
+    <button class="run-btn" id="flowRun">Run min-cost max-flow</button>
+    <div class="output" id="flowOutput"></div>
+  </section>
+<section class="algo-panel" id="sosPanel" style="border-top-color:#7A5FB5;">
+    <div class="algo-head">
+       <h2>Subset DP — Optimal Partition (Sum over Subsets)</h2>
+      <span class="algo-tag" style="background:#5B4394;">SOS, O(n·2ⁿ)</span>
+    </div>
+    <p class="hint">Sum over Subsets precomputes, for <b>every</b> subset of the customer cities,
+      the total depot-distance of that subset — in O(n·2ⁿ) instead of re-adding it up from
+      scratch each time. Those precomputed sums make it cheap to then search, by DP over subsets,
+      for the way to split customers into vehicles that minimizes total distance <b>exactly</b> —
+      unlike the min-cost max-flow panel, this isn't limited to evenly-sized groups.</p>
+
+    <div class="controls-row" id="sosControls"></div>
+
+    <button class="run-btn" id="sosRun" style="background:#5B4394;">Run Sum over Subsets</button>
+    <div class="output" id="sosOutput"></div>
+  </section>
+  </div>
+
+  <!-- ===== Session log ===== -->
+  <div class="view" data-view="log" hidden>
+    <header class="page-head"><h1>Session log</h1><p>Every algorithm run since you signed in. Clears when you sign out.</p></header>
+    <section class="card"><div id="logTable"></div><div class="picker-actions"><button class="link-btn" id="logClear" type="button">Clear log</button></div></section>
+  </div>
+
+  <footer class="foot">Distances are road-network figures between 100 Indian cities. Everything runs client-side, so no data leaves this page.</footer>
+  </main>
+</div>
+
+<script src="data/distances.js"></script>
+<script src="script.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
